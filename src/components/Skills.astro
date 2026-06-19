@@ -1,0 +1,14 @@
+---
+import { skills } from "../data/skills";
+import SkillCard from "./SkillCard.astro";
+---
+<section id="skills" class="skills py-20 bg-honey-bg">
+  <div class="container mx-auto w-full max-w-[1100px] px-5">
+    <h2 class="text-3xl font-bold text-honey-text mb-8">Skills</h2>
+    <ul class="skills-grid list-none m-0 p-0 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+      {skills.map((skill) => (
+        <SkillCard name={skill.name} />
+      ))}
+    </ul>
+  </div>
+</section>

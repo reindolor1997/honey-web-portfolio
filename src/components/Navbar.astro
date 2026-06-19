@@ -1,0 +1,170 @@
+---
+---
+<header>
+  <nav class="navbar fixed top-0 left-0 right-0 z-50 bg-honey-surface shadow-sm">
+    <div class="navbar__inner mx-auto w-full max-w-[1100px] px-5 flex items-center justify-between h-16">
+      <a href="#home" class="navbar__brand text-xl font-bold text-honey-accent no-underline">Honey</a>
+      <button
+        class="nav-toggle flex flex-col justify-center gap-[5px] w-8 h-8 bg-transparent border-none cursor-pointer md:hidden"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul class="nav-menu list-none m-0 p-0 flex gap-6 md:flex">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<style>
+  /* Nav toggle hamburger bars */
+  .nav-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-honey-text);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* Mobile nav menu — collapsed by default */
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background-color: var(--color-honey-surface);
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+  }
+
+  /* Open state */
+  .navbar.nav-open .nav-menu {
+    display: flex;
+    max-height: 400px;
+  }
+
+  /* Hamburger animation when open */
+  .navbar.nav-open .nav-toggle span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .navbar.nav-open .nav-toggle span:nth-child(2) {
+    opacity: 0;
+  }
+  .navbar.nav-open .nav-toggle span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Nav link styles */
+  .nav-menu a {
+    display: block;
+    padding: 0.5rem 0;
+    color: var(--color-honey-text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .nav-menu a:hover,
+  .nav-menu a.active {
+    color: var(--color-honey-accent);
+  }
+
+  /* Desktop: restore normal nav layout */
+  @media (min-width: 768px) {
+    .nav-toggle {
+      display: none;
+    }
+
+    .nav-menu {
+      display: flex !important;
+      flex-direction: row;
+      position: static;
+      background-color: transparent;
+      padding: 0;
+      box-shadow: none;
+      max-height: none;
+      overflow: visible;
+      gap: 1.5rem;
+    }
+
+    .nav-menu a {
+      padding: 0;
+    }
+  }
+</style>
+
+<script>
+  const navbar = document.querySelector<HTMLElement>('.navbar');
+  const navToggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-menu a');
+
+  function openMenu() {
+    if (!navbar || !navToggle) return;
+    navbar.classList.add('nav-open');
+    navToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeMenu() {
+    if (!navbar || !navToggle) return;
+    navbar.classList.remove('nav-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  if (navToggle && navbar) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = navbar.classList.contains('nav-open');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+  }
+
+  navLinks.forEach((link) => {
+    link.addEventListener('click', () => {
+      closeMenu();
+    });
+  });
+
+  if ('IntersectionObserver' in window) {
+    const sections = document.querySelectorAll('section[id]');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -60% 0px',
+      threshold: 0,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach((link) => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + id) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+  }
+</script>

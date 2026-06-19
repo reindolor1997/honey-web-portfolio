@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* Honey / amber theme tokens — exposes utilities like bg-honey-bg, text-honey-text, etc. */
+@theme {
+  --color-honey-bg: #fffdf7;
+  --color-honey-surface: #ffffff;
+  --color-honey-text: #2b2218;
+  --color-honey-muted: #6b5d4a;
+  --color-honey-accent: #f4a823;
+  --color-honey-accent-dark: #d98b0c;
+  --font-poppins: "Poppins", system-ui, -apple-system, sans-serif;
+}
+
+/* Global rules kept verbatim (not expressible cleanly as utilities) */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-poppins);
+  background-color: var(--color-honey-bg);
+  color: var(--color-honey-text);
+  line-height: 1.7;
+}
+
+/* Fixed navbar offset so anchored section headings aren't hidden. 64px = navbar height. */
+section[id] {
+  scroll-margin-top: 64px;
+}
+
+/* Accessible keyboard focus ring */
+:focus-visible {
+  outline: 3px solid var(--color-honey-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Contact form status colors (referenced by JS in Contact.astro) */
+.form-status.success {
+  color: #2d7a2d;
+}
+.form-status.error {
+  color: #c0392b;
+}

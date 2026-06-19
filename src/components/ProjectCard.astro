@@ -1,0 +1,23 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  demoUrl: string;
+  sourceUrl: string;
+}
+const { title, description, demoUrl, sourceUrl } = Astro.props;
+---
+<article class="project-card bg-honey-surface rounded-2xl shadow-sm p-6 flex flex-col gap-4 hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+  <h3 class="text-xl font-bold text-honey-text">{title}</h3>
+  <p class="text-honey-muted flex-1">{description}</p>
+  <div class="project-links flex gap-3 flex-wrap">
+    <a
+      href={demoUrl}
+      class="inline-block px-5 py-2 rounded-xl font-semibold bg-honey-accent text-white hover:bg-honey-accent-dark transition-colors duration-200 no-underline text-sm"
+    >Live Demo</a>
+    <a
+      href={sourceUrl}
+      class="inline-block px-5 py-2 rounded-xl font-semibold border-2 border-honey-accent text-honey-accent hover:bg-honey-accent hover:text-white transition-colors duration-200 no-underline text-sm"
+    >Source</a>
+  </div>
+</article>

@@ -1,0 +1,9 @@
+---
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+---
+<li class="skill-card bg-honey-surface rounded-xl shadow-sm px-6 py-4 font-semibold text-honey-text text-center hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+  {name}
+</li>
