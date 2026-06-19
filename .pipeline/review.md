@@ -1,83 +1,70 @@
-# Final Review — Honey Web Portfolio
+# Final Review — Astro Migration (Honey Web Portfolio)
 
-## VERDICT: APPROVED
+## VERDICT: NEEDS WORK
 
-All 111 static tests pass (re-run and confirmed by reviewer, not taken on trust).
-The three deliverables (index.html, css/style.css, js/main.js) match the spec on
-every required structural, behavioral, and accessibility point. No security,
-correctness, or blocking issues found. The notes below are minor / optional and
-do not block shipping.
-
----
-
-## Process note
-The task referenced `.pipeline/test-results.md`, which does not exist. The actual
-test artifact is `.pipeline/test.js` (a Node static-analysis suite). I executed it
-directly: 111/111 PASS, exit code 0. Verdict is based on the real run plus a
-manual read of all three source files against the spec.
+Functionally the migration is correct, spec-compliant, secure, and all 71 tests pass
+against a real build whose CSS I verified actually contains the compiled honey-theme
+utilities. There is exactly one spec deliverable that was not done (README), plus minor
+naming notes. Fix the README item, then this ships.
 
 ---
 
-## Spec compliance — verified
+## Must fix
 
-HTML
-- DOCTYPE, `lang="en"`, UTF-8, responsive viewport: present.
-- Relative asset paths only (`css/style.css`, `js/main.js` with `defer`); no
-  root-absolute paths, so `file://` double-click works as required.
-- Section order home / about / skills / projects / contact + header nav + footer.
-- Exactly one `<h1>`; `<h2>` per section; three `<article class="project-card">`
-  each with one `<h3>`; six `.skill-card` items with the exact skill names.
-- Nav toggle button has `aria-label="Toggle menu"` and `aria-expanded="false"`
-  with three `<span>` bars.
-- Form: `id="contact-form" novalidate`, required text/email/textarea inputs each
-  with a matching `<label for>`, submit button, and an empty
-  `<p class="form-status" role="status" aria-live="polite">`.
-- Placeholder email `reinvesting1012026@gmail.com` used in both visible text and
-  the `mailto:` href; social/project links are `#`; footer year static 2026.
-- `<!-- TODO: replace placeholder -->` comments mark every placeholder.
-
-CSS
-- All nine `:root` custom properties match the spec values exactly, plus a
-  helper `--navbar-height: 64px`.
-- Universal `box-sizing`, `body { margin: 0 }`, `html { scroll-behavior: smooth }`.
-- `.navbar` fixed/top:0/full-width with surface bg + shadow; `section`
-  `scroll-margin-top: var(--navbar-height)` prevents heading overlap on anchor nav.
-- Mobile-first with 768px and 1024px breakpoints; toggle hidden + horizontal menu
-  at 768px; grids go single/multi-column with auto-fit/minmax at 1024px.
-- `.btn`, `.btn-primary`, `.btn-secondary`, hover lift, `:focus-visible` amber
-  outline, `.form-status.success`/`.error` colors all present.
-
-JS
-- IIFE + strict mode, no dependencies.
-- Nav toggle adds/removes `nav-open` and flips `aria-expanded`; every
-  `.nav-menu a` click calls `closeMenu()`.
-- Submit handler calls `preventDefault()`, trims all fields, validates with the
-  exact spec regex, clears both status classes before setting the new one
-  (no stacking — addresses edge case 4), focuses the first invalid field,
-  and on success sets the exact success string + `form.reset()`.
-- IntersectionObserver guarded by `'IntersectionObserver' in window` — degrades
-  cleanly (edge case 8). All node lookups are null-guarded.
-
-Security: no inline event handlers, no `innerHTML`/`eval`, no network calls, no
-third-party scripts beyond the one Google Font `<link>`. Status text is set via
-`textContent`, so no injection surface. Clean.
+1. **README.md not updated (spec Section J).**
+   `/Users/rein/Desktop/Claude Projects/Cursor Project/Honey Web Portfolio/README.md`
+   still contains only `# Honey Web Portfolio`. Spec J explicitly requires documenting the
+   new stack and commands: `npm install`, `npm run dev` (localhost:4321),
+   `npm run build` (outputs `dist/`), `npm run preview`, `npm test`, plus the notes that
+   the site is static (no adapter) and that previewing the build needs a server, not
+   `file://`. changes.md does not even list README as modified, so this was simply missed.
 
 ---
 
-## Minor notes (non-blocking, optional follow-up)
+## Notes (non-blocking, no action strictly required)
 
-1. Grid on mobile — Spec says grids are "single column on mobile." `.skills-grid`
-   is `1fr 1fr` (two columns) on mobile. This was explicitly disclosed in
-   changes.md and is a reasonable visual call for short skill labels, so I am not
-   treating it as a defect — just flagging the wording mismatch.
-2. External `href="#"` social/project anchors have no `aria-disabled` or visible
-   "placeholder" cue; clicking jumps to top. Acceptable for placeholders, but
-   worth revisiting when real URLs land.
-3. Tests are static/regex-based — they verify presence of code, not runtime DOM
-   behavior. I confirmed the logic by manual read (toggle, validation sequencing,
-   observer guard) and found it correct, so the coverage gap does not change the
-   verdict. A future jsdom/Playwright pass would harden against regressions.
-4. `gmail.com` placeholder email is the owner's real address per the spec's
-   open-question resolution — intentional, not a leak.
+- **Test file renamed `test.js` -> `test.cjs`.** Spec/Section H names `.pipeline/test.js`;
+  the delivered file is `.pipeline/test.cjs` and `package.json` `"test"` points at it
+  consistently. Since `package.json` has `"type": "module"`, a `.js` file using
+  `require()` would have thrown — renaming to `.cjs` is the correct fix, not a defect.
+  Acceptable deviation; just flagging the divergence from the spec text.
 
-No changes required to ship.
+---
+
+## What I verified (all good)
+
+- **Spec compliance:** every component matches Section E (class names `navbar`/`nav-menu`/
+  `nav-toggle`/`nav-open` preserved, 3 hamburger `<span>`s, 5 nav links in order, hero
+  single `<h1>`, `.hero-subtitle`, both CTAs target `#projects`/`#contact`, 6 skills, 3
+  projects, contact form with `novalidate` + required inputs + labels + `role="status"
+  aria-live="polite"` empty status, mailto + `href="#"` socials, footer year 2026).
+  Page composition and section order match Section F. Config files (astro.config.mjs,
+  tsconfig, tailwind.config shim, package.json) match Sections A1–A4. global.css matches
+  B1 verbatim.
+- **Tailwind v4 correctness:** `@import "tailwindcss"` + `@theme` tokens. I checked the
+  built `dist/_astro/index.BGpfrrE8.css` and confirmed the hyphenated/edge tokens actually
+  compile to real utilities and values: `bg-honey-surface`, `text-honey-muted`,
+  `honey-accent` (#f4a823), `bg-honey-accent-dark` (#d98b0c), plus the `:focus-visible`
+  ring and `.form-status` colors. Tokens are not silently dropped.
+- **Astro best practices:** typed `Props` interfaces in SkillCard/ProjectCard/Layout,
+  data imported in frontmatter and `.map`-rendered, colocated `<script>` blocks (compiled
+  to ES module `<script type="module">` in dist), single `<slot />` layout, no manual
+  framework runtime shipped.
+- **TypeScript:** `Skill`/`Project` interfaces and typed arrays; scripts use typed
+  `querySelector<T>` and proper null guards on every queried element.
+- **Accessibility:** aria-label/aria-expanded on toggle, label-for bindings, live region
+  preserved, focus management on validation errors, keyboard focus ring.
+- **Security:** no `innerHTML`, no `eval`. Dynamic status text uses `textContent`. No
+  network calls in the form. Clean.
+- **Content fidelity:** "Your Name", "Web Developer & Designer", both About paragraphs,
+  all 3 project copy blocks, `reinvesting1012026@gmail.com`, `#` social links, and year
+  2026 all preserved verbatim in dist output.
+- **Tests are meaningful, not superficial:** structural assertions run against the real
+  built `dist/index.html`; behavioral assertions (nav-open toggle, aria-expanded
+  true/false, IntersectionObserver guard, form regex/trim/reset/success string) run
+  against component source because Astro minifies inline scripts; email regex has
+  valid/invalid unit arrays. Build-guard exits early if `dist` is missing. Legacy files
+  (`index.html`, `css/`, `js/`) correctly deleted.
+
+I re-ran the suite: **71 PASS / 0 FAIL**, exit 0. Green tests here genuinely reflect
+correct behavior.

@@ -1,88 +1,52 @@
-# Implementation Changes
+# Migration Changes — Honey Web Portfolio (Astro + Tailwind v4 + TypeScript)
 
 ## Files Created
 
-### index.html
-Single-page HTML5 document. Sections in order: fixed navbar header, hero, about,
-skills, projects, contact, footer.
+| File | Purpose |
+|------|---------|
+| `package.json` | Project manifest; defines `astro@^5` dependency, `@tailwindcss/vite` + `tailwindcss@^4` dev deps, and `dev/build/preview/test` scripts. |
+| `astro.config.mjs` | Astro config — static output, Tailwind v4 via `@tailwindcss/vite` Vite plugin. No deploy adapter. |
+| `tsconfig.json` | Extends `astro/tsconfigs/strict`; includes `.astro/types.d.ts`. |
+| `tailwind.config.mjs` | Thin content-shim for Tailwind v4 (token source of truth lives in `@theme` in CSS). |
+| `src/styles/global.css` | Imports Tailwind v4 (`@import "tailwindcss"`), defines honey palette via `@theme`, plus minimal global rules (scroll-behavior, body font/bg/color, scroll-margin-top, focus-visible ring, form-status colors). |
+| `src/data/skills.ts` | TypeScript data — `Skill` interface + array of 6 skills (HTML5, CSS3, JavaScript, Responsive Design, Git, Accessibility). |
+| `src/data/projects.ts` | TypeScript data — `Project` interface + array of 3 placeholder projects with `demoUrl`/`sourceUrl` defaulting to `"#"`. |
+| `src/layouts/Layout.astro` | Root layout owning `<html lang="en">`, `<head>` (charset, viewport, title, Poppins preconnect + stylesheet), global CSS import, single `<slot />`. |
+| `src/components/Navbar.astro` | Fixed navbar with hamburger toggle; keeps `navbar`/`nav-menu`/`nav-toggle`/`nav-open` class names; scoped `<style>` for mobile collapse animation; colocated `<script>` for toggle behavior, `aria-expanded` management, close-on-link-click, and IntersectionObserver active-link tracking. |
+| `src/components/Hero.astro` | `<section id="home" class="hero">` with `<h1>Your Name</h1>`, `.hero-subtitle`, and two CTA anchors (`#projects`, `#contact`). |
+| `src/components/About.astro` | `<section id="about">` with two placeholder `<p>` paragraphs verbatim from original. |
+| `src/components/SkillCard.astro` | Renders `<li class="skill-card">` accepting `name` prop. |
+| `src/components/Skills.astro` | `<section id="skills">` mapping `skills` data to `<SkillCard />`; responsive 2/3/auto-fit grid. |
+| `src/components/ProjectCard.astro` | Renders `<article class="project-card">` with `<h3>`, `<p>`, and `.project-links` (Live Demo + Source anchors). |
+| `src/components/Projects.astro` | `<section id="projects">` mapping `projects` data to `<ProjectCard />`; responsive 1/2/auto-fit grid. |
+| `src/components/Contact.astro` | `<section id="contact">` with `<form id="contact-form" novalidate>` (name/email/message/submit/form-status), social block with mailto link and `href="#"` GitHub/LinkedIn/Twitter placeholders, colocated `<script>` for sequential form validation with `setStatus()` helper. |
+| `src/components/Footer.astro` | `<footer>` with static copyright line `2026 Your Name`. |
+| `src/pages/index.astro` | Sole page — imports Layout + all 7 components in section order (Navbar, Hero, About, Skills, Projects, Contact, Footer). |
 
-Key details:
-- Google Fonts (Poppins) loaded via `<link>` in `<head>`.
-- `js/main.js` loaded with `defer` in `<head>` (all paths relative so file:// works).
-- Nav toggle button carries `aria-label="Toggle menu"` and `aria-expanded="false"` (JS flips it).
-- Every form input has a matching `<label for>` to satisfy accessibility requirements.
-- `<form id="contact-form" novalidate>` — browser native validation disabled; JS handles it.
-- `<p class="form-status" role="status" aria-live="polite">` is present but empty on load.
-- All placeholder text and links marked with `<!-- TODO: replace placeholder -->` comments.
-- Email placeholder uses `reinvesting1012026@gmail.com` per spec open-question resolution.
-- Social link hrefs are `#` placeholders; project Live Demo / Source hrefs are `#` placeholders.
-- Footer year is static "2026".
+## Files Modified
 
-### css/style.css
-Mobile-first stylesheet with a single `@media (min-width: 768px)` breakpoint and a
-`@media (min-width: 1024px)` breakpoint for wider grid layouts.
+| File | Change |
+|------|--------|
+| `.gitignore` | Added `dist/`, `node_modules/`, `.astro/` entries beneath the existing `.claude/settings.local.json` line. |
+| `.pipeline/test.js` | Full replacement. Removed all assertions against deleted legacy files (`css/style.css`, `js/main.js`). Removed CSS `:root` custom-property assertions, CSS rule/grid/breakpoint assertions, IIFE/`'use strict'` assertions, relative asset path assertions (`href="css/style.css"`, `src="js/main.js"`), and TODO comment assertion (Astro strips HTML comments from `dist/`). Added build guard (exits with error if `dist/index.html` missing). Retargeted all HTML tests to `dist/index.html`. Added source-file behavior tests against `Navbar.astro` (nav-open add/remove, aria-expanded true/false, IntersectionObserver guard/section[id]/rootMargin) and `Contact.astro` (submit listener, preventDefault, email regex, .trim(), success string, .reset()). Added data integrity tests against `src/data/skills.ts` and `src/data/projects.ts`. Kept email regex unit-test arrays verbatim. |
 
-Key details:
-- All nine CSS custom properties defined in `:root` exactly as spec prescribes.
-- `* { box-sizing: border-box; }` and `body { margin: 0; }` reset applied.
-- `html { scroll-behavior: smooth; }` set.
-- `--navbar-height: 64px` custom property used consistently for navbar height,
-  `padding-top` on the hero, and `scroll-margin-top` on all sections (prevents
-  fixed nav from covering headings on anchor navigation).
-- `.container` centered with `max-width: var(--max-width)` and `margin-inline: auto`.
-- `.btn`, `.btn-primary`, `.btn-secondary` defined with hover lift transition.
-- `.nav-menu` collapses via `max-height: 0 / overflow: hidden` on mobile; expands
-  when `.navbar` has class `nav-open`. Toggle button animates to X shape.
-- On desktop (768px+) the toggle is `display: none` and `.nav-menu` is a horizontal
-  flex row.
-- `.skills-grid` and `.projects-grid` use CSS Grid with `auto-fit / minmax` at
-  wider breakpoints; single/two-column on mobile.
-- `.skill-card` and `.project-card` have surface background, `--radius`, `--shadow`,
-  and a `translateY` hover-lift transition.
-- `:focus-visible` outline set to `3px solid var(--color-accent)` for keyboard users.
-- `.form-status.success` → green text; `.form-status.error` → red text.
+## Files Deleted
 
-### js/main.js
-Plain IIFE, no modules, no dependencies. All behavior wrapped in strict mode.
-
-Behavior 1 — Mobile nav toggle:
-- Queries `.nav-toggle` and `.navbar`.
-- Click toggles class `nav-open` on the navbar and flips `aria-expanded` on the
-  button between "true" / "false".
-- Each `.nav-menu a` click calls `closeMenu()`.
-
-Behavior 2 — Contact form validation:
-- Listens for `submit` on `#contact-form`, calls `e.preventDefault()`.
-- Validates name (non-empty trimmed), email (regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`),
-  message (non-empty trimmed) in sequence; each failure sets an error message and
-  focuses the offending field.
-- Each submit unconditionally calls `formStatus.classList.remove('success', 'error')`
-  before adding the new class, preventing stacking.
-- On success: sets text to "Thanks! Your message has been received.", adds `.success`,
-  calls `form.reset()`.
-
-Behavior 3 — Active nav link on scroll:
-- Guarded by `if ('IntersectionObserver' in window)` so missing-browser support
-  degrades silently.
-- Observes all `section[id]` elements with `rootMargin: '0px 0px -60% 0px'` so
-  the active link updates when a section reaches the top portion of the viewport.
-- On intersection: removes `active` from all nav links, adds it to the matching one.
+| File | Reason |
+|------|--------|
+| `index.html` | Replaced by Astro build output at `dist/index.html`. |
+| `css/style.css` | Styles migrated to `src/styles/global.css` (Tailwind v4 `@theme`) and Tailwind utilities inline in components. |
+| `css/` (directory) | Empty after `style.css` removal. |
+| `js/main.js` | Behavior migrated to colocated `<script>` blocks in `Navbar.astro` (toggle + scroll spy) and `Contact.astro` (form validation). |
+| `js/` (directory) | Empty after `main.js` removal. |
 
 ## Tester Focus Areas
 
-1. **Anchor navigation** — Click each nav link and verify the section heading is
-   fully visible below the fixed navbar (scroll-margin-top must be working).
-2. **Mobile nav** — Resize to < 768 px. Toggle must open/close, X animation must
-   play, clicking a link must close the menu before the target section scrolls into view.
-3. **Form validation edge cases**:
-   - Whitespace-only name, email, or message must be rejected.
-   - Malformed emails ("noDomain", "no@dot", "@start.com") must fail.
-   - Valid submission must clear the form and show success text; a second submission
-     after clearing must re-validate (not duplicate the status text).
-4. **Keyboard-only navigation** — Tab through nav links, buttons, and form fields.
-   Each must show the amber focus outline.
-5. **file:// protocol** — Open index.html by double-click (not a dev server). Font,
-   stylesheet, and script must all load (all paths are relative).
-6. **IntersectionObserver fallback** — Simulate unavailability by temporarily
-   deleting `window.IntersectionObserver` in DevTools; the page must still load and
-   function with no console errors.
+1. **`dist/index.html` structure** — all five `section[id]` values, exactly one `<h1>`, exactly 6 `.skill-card` items, exactly 3 `.project-card` articles, `form-status` empty on load.
+2. **Nav toggle markup** — `aria-expanded="false"` on load, exactly 3 `<span>` bars inside `.nav-toggle`.
+3. **Hero CTAs** — `href="#projects"` on "View My Work", `href="#contact"` on "Contact Me".
+4. **Contact form** — `novalidate` attribute present, all three inputs have `required`, submit button text is matched with surrounding whitespace (`\s*Send Message\s*`) because Astro emits a newline inside the button element.
+5. **Source behavior tests** — read `.astro` component source files directly, resilient to Astro's inline-script minification. If a component script is refactored, update these tests.
+6. **Email regex unit tests** — run entirely in Node; no browser needed.
+7. **Build guard** — if `dist/` is missing or stale, the test runner exits early with a clear message instead of a cryptic read error.
+8. **Preview, not file://** — Astro emits `/_astro/...` absolute asset paths. Always verify the build with `npm run preview`, not by opening `dist/index.html` directly in the browser.
